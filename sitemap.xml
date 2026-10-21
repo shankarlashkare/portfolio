@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://shankarlashkare.github.io/portfolio/</loc>
     <lastmod>2026-10-21</lastmod>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://shankarlashkare.github.io/portfolio/assets/shankar-lashkare.jpg</image:loc>
+      <image:title>Shankar Lashkare - Full-Stack Developer &amp; Software Engineer</image:title>
+      <image:caption>Shankar Lashkare (Shankar Lashkar) Full-Stack Software Developer Portfolio</image:caption>
+    </image:image>
   </url>
 </urlset>
