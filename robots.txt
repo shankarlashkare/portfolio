@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://shankarlashkare.github.io/portfolio/sitemap.xml
