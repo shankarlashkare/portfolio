@@ -136,10 +136,10 @@ function initTypewriter() {
   if (!typewriterElem) return;
 
   const roles = [
-    "Full-Stack Web Developer",
+    "Full-Stack Developer & Software Engineer",
     "Docker & Cloud Systems Engineer",
     "Compiler-X Lead Architect",
-    "Java & LeetCode DSA Enthusiast",
+    "Java & LeetCode DSA Expert",
     "Building Resilient Developer Tools"
   ];
 

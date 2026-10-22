@@ -610,12 +610,52 @@ pre {
   }
 }
 
-.hero-title {
-  font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+/* Hero Name Introduction Block */
+.hero-name-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  animation: fadeSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-greeting {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent-blue);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-name {
+  font-family: var(--font-heading);
+  font-size: clamp(2.6rem, 5.5vw, 4.2rem);
   font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.035em;
-  color: var(--text-primary);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: var(--text-secondary);
 }
 
 .hero-typewriter {
