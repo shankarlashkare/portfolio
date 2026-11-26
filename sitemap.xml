@@ -3,12 +3,12 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <!-- Replace placeholder domain below with your live portfolio URL before deploying -->
   <url>
-    <loc>https://your-username.github.io/portfolio/</loc>
+    <loc>https://shankarlashkare.github.io/portfolio/</loc>
     <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://your-username.github.io/portfolio/assets/shankar-lashkare.jpg</image:loc>
+      <image:loc>https://shankarlashkare.github.io/portfolio/assets/shankar-lashkare.jpg</image:loc>
       <image:title>Shankar Lashkare — Aspiring Software Engineer &amp; Full-Stack Web Developer</image:title>
       <image:caption>Shankar Lashkare Developer Portfolio</image:caption>
     </image:image>
