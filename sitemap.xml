@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Replace placeholder domain below with your live portfolio URL before deploying -->
   <url>
-    <loc>https://shankarlashkare.github.io/portfolio/</loc>
-    <lastmod>2026-10-21</lastmod>
-    <changefreq>daily</changefreq>
+    <loc>https://your-username.github.io/portfolio/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://shankarlashkare.github.io/portfolio/assets/shankar-lashkare.jpg</image:loc>
-      <image:title>Shankar Lashkare - shankar Lashkare &amp; Software Engineer</image:title>
-      <image:caption>Shankar Lashkare (Shankar Lashkar) Full-Stack Software Developer Portfolio</image:caption>
+      <image:loc>https://your-username.github.io/portfolio/assets/shankar-lashkare.jpg</image:loc>
+      <image:title>Shankar Lashkare — Aspiring Software Engineer &amp; Full-Stack Web Developer</image:title>
+      <image:caption>Shankar Lashkare Developer Portfolio</image:caption>
     </image:image>
   </url>
 </urlset>

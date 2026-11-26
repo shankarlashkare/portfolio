@@ -1,701 +1,452 @@
 /**
- * SHANKAR LASHKAR — PERSONAL PORTFOLIO WEB APPLICATION
- * Lead Senior Frontend Architecture & Interactive System
+ * SHANKAR LASHKARE — DEVELOPER PORTFOLIO
+ * Clean, modular vanilla JavaScript with zero external dependencies.
  */
 
+/**
+ * Editable Portfolio Configuration
+ * Replace any empty/placeholder values below with your real links and resume file path.
+ */
+const PORTFOLIO_CONFIG = {
+  email: 'your.email@example.com',
+  resumeUrl: '', // e.g. 'assets/Shankar-Lashkare-Resume.pdf' once your PDF is placed in assets/
+  links: {
+    github: '',         // e.g. 'https://github.com/your-username'
+    leetcode: '',       // e.g. 'https://leetcode.com/u/your-username'
+    linkedin: '',       // e.g. 'https://www.linkedin.com/in/your-profile'
+    compilerXRepo: '',  // e.g. 'https://github.com/your-username/compiler-x'
+    portfolioRepo: '',  // e.g. 'https://github.com/your-username/portfolio'
+    javaDsaRepo: ''     // e.g. 'https://github.com/your-username/java-dsa'
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Theme Management (Dark / Light Mode)
-  initTheme();
-
-  // 2. Navigation & Sticky Scroll Effects
+  initThemeSwitcher();
   initNavigation();
-
-  // 3. Dynamic Typewriter in Hero
-  initTypewriter();
-
-  // 4. Interactive Compiler-X Playground
-  initCompilerPlayground();
-
-  // 5. Skills Category Filtering
+  initScrollReveal();
   initSkillsFilter();
-
-  // 6. Contact Form & Toast Notifications
-  initContactForm();
-
-  // 7. Interactive Resume Modal
-  initResumeModal();
-
-  // 8. 3D Tilt Effect on Photo Card
-  initTiltEffect();
-
-  // 9. Back to Top Button
-  initBackToTop();
+  initConfigurableLinks();
+  initResumeDownload();
+  initContactSection();
+  initModalControls();
+  updateFooterYear();
 });
 
 /* ==========================================================================
-   1. THEME SWITCHER SYSTEM
+   1. THEME SYSTEM (WHITE / DARK / SYSTEM)
    ========================================================================== */
-function initTheme() {
-  const toggleBtn = document.getElementById('theme-toggle');
-  const storedTheme = localStorage.getItem('theme');
-  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const THEME_STORAGE_KEY = 'portfolio-theme-mode';
 
-  // Determine initial theme: default to dark for high-tech aesthetic, unless light previously set
-  let activeTheme = storedTheme ? storedTheme : (systemPrefersDark ? 'dark' : 'dark');
-  document.documentElement.setAttribute('data-theme', activeTheme);
+function resolveTheme(mode) {
+  if (mode === 'system') {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+  }
+  return mode === 'dark' ? 'dark' : 'light';
+}
 
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const nextTheme = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', nextTheme);
-      localStorage.setItem('theme', nextTheme);
-      showToast(`Switched to ${nextTheme === 'dark' ? 'Dark Obsidian' : 'Light Studio'} theme`, 'info');
-    });
+function applyThemeMode(mode, persist = true) {
+  const validMode = ['light', 'dark', 'system'].includes(mode) ? mode : 'light';
+  const resolved = resolveTheme(validMode);
+
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.setAttribute('data-theme-mode', validMode);
+
+  const metaThemeColor = document.getElementById('meta-theme-color');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute('content', resolved === 'dark' ? '#09090b' : '#ffffff');
   }
 
-  // Listen to OS preference change if user hasn't explicitly set preference
-  if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      if (!localStorage.getItem('theme')) {
-        const newTheme = e.matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme);
-      }
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    const isSelected = btn.getAttribute('data-theme-option') === validMode;
+    btn.setAttribute('aria-pressed', String(isSelected));
+  });
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, validMode);
+    } catch (e) {
+      // Ignore storage failures in restricted contexts
+    }
+  }
+}
+
+function initThemeSwitcher() {
+  let savedMode = 'light';
+  try {
+    savedMode = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
+  } catch (e) {
+    savedMode = 'light';
+  }
+
+  applyThemeMode(savedMode, false);
+
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nextMode = btn.getAttribute('data-theme-option');
+      applyThemeMode(nextMode, true);
+      const labelMap = { light: 'White', dark: 'Dark', system: 'System' };
+      showToast(`Theme switched to ${labelMap[nextMode] || nextMode} mode.`);
     });
+  });
+
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = () => {
+      const currentMode = document.documentElement.getAttribute('data-theme-mode');
+      if (currentMode === 'system') {
+        applyThemeMode('system', false);
+      }
+    };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleSystemChange);
+    } else if (typeof mediaQuery.addListener === 'function') {
+      mediaQuery.addListener(handleSystemChange);
+    }
   }
 }
 
 /* ==========================================================================
-   2. NAVIGATION & SCROLL SPY
+   2. NAVIGATION, MOBILE HAMBURGER MENU & SCROLL SPY
    ========================================================================== */
 function initNavigation() {
-  const siteNav = document.getElementById('site-nav');
-  const mobileToggle = document.getElementById('mobile-toggle');
-  const navMenu = document.getElementById('nav-menu');
-  const navLinks = document.querySelectorAll('.nav-link');
+  const header = document.getElementById('site-header');
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileDrawer = document.getElementById('mobile-drawer');
+  const allNavLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+  const trackedSections = document.querySelectorAll('main section[id]');
 
-  // Sticky nav header scroll shadow
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 25) {
-      siteNav.classList.add('scrolled');
-    } else {
-      siteNav.classList.remove('scrolled');
-    }
+  function setDrawerOpen(isOpen) {
+    if (!menuToggle || !mobileDrawer) return;
+    mobileDrawer.classList.toggle('open', isOpen);
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+  }
 
-    // Scroll spy for active menu highlighting
-    let currentSection = '';
-    const sections = document.querySelectorAll('section[id]');
-    
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 120;
-      const sectionHeight = section.offsetHeight;
-      if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-        currentSection = section.getAttribute('id');
+  if (menuToggle && mobileDrawer) {
+    menuToggle.addEventListener('click', () => {
+      const nextState = !mobileDrawer.classList.contains('open');
+      setDrawerOpen(nextState);
+    });
+
+    mobileDrawer.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => setDrawerOpen(false));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (
+        mobileDrawer.classList.contains('open') &&
+        !mobileDrawer.contains(event.target) &&
+        !menuToggle.contains(event.target)
+      ) {
+        setDrawerOpen(false);
       }
     });
 
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === `#${currentSection}`) {
-        link.classList.add('active');
-      }
-    });
-  });
-
-  // Mobile drawer toggle
-  if (mobileToggle && navMenu) {
-    mobileToggle.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      const isOpen = navMenu.classList.contains('open');
-      mobileToggle.setAttribute('aria-expanded', isOpen);
-    });
-
-    // Close mobile menu when clicking any nav link
-    navLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('open');
-        if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
-      });
-    });
-
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!navMenu.contains(e.target) && !mobileToggle.contains(e.target) && navMenu.classList.contains('open')) {
-        navMenu.classList.remove('open');
-        mobileToggle.setAttribute('aria-expanded', 'false');
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && mobileDrawer.classList.contains('open')) {
+        setDrawerOpen(false);
+        menuToggle.focus();
       }
     });
   }
+
+  function updateOnScroll() {
+    if (header) {
+      header.classList.toggle('scrolled', window.scrollY > 12);
+    }
+
+    const scrollPosition = window.scrollY + 140;
+    let activeId = 'home';
+
+    trackedSections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      if (scrollPosition >= top && scrollPosition < top + height) {
+        activeId = section.getAttribute('id');
+      }
+    });
+
+    // Map #journey and #profiles highlight cleanly to the nearest primary nav item
+    if (activeId === 'journey') activeId = 'education';
+    if (activeId === 'profiles') activeId = 'projects';
+
+    allNavLinks.forEach(link => {
+      const matches = link.getAttribute('href') === `#${activeId}`;
+      link.classList.toggle('active', matches);
+    });
+  }
+
+  window.addEventListener('scroll', updateOnScroll, { passive: true });
+  updateOnScroll();
 }
 
 /* ==========================================================================
-   3. HERO DYNAMIC TYPEWRITER
+   3. SCROLL REVEAL ANIMATIONS
    ========================================================================== */
-function initTypewriter() {
-  const typewriterElem = document.getElementById('typewriter-text');
-  if (!typewriterElem) return;
+function initScrollReveal() {
+  const elements = document.querySelectorAll('.reveal');
+  if (!elements.length) return;
 
-  const roles = [
-    "Full-Stack Developer & Software Engineer",
-    "Docker & Cloud Systems Engineer",
-    "Compiler-X Lead Architect",
-    "Java & LeetCode DSA Expert",
-    "Building Resilient Developer Tools"
-  ];
+  const prefersReducedMotion =
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let roleIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let typingSpeed = 80;
-
-  function type() {
-    const currentRole = roles[roleIndex];
-    if (isDeleting) {
-      typewriterElem.textContent = currentRole.substring(0, charIndex - 1);
-      charIndex--;
-      typingSpeed = 35;
-    } else {
-      typewriterElem.textContent = currentRole.substring(0, charIndex + 1);
-      charIndex++;
-      typingSpeed = 80;
-    }
-
-    if (!isDeleting && charIndex === currentRole.length) {
-      typingSpeed = 2000; // Pause at end of word
-      isDeleting = true;
-    } else if (isDeleting && charIndex === 0) {
-      isDeleting = false;
-      roleIndex = (roleIndex + 1) % roles.length;
-      typingSpeed = 400; // Pause before typing next
-    }
-
-    setTimeout(type, typingSpeed);
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('is-visible'));
+    return;
   }
 
-  type();
-}
-
-/* ==========================================================================
-   4. FLAGSHIP PROJECT: COMPILER-X INTERACTIVE PLAYGROUND
-   ========================================================================== */
-const compilerSnippets = {
-  python: {
-    name: "Python 3.12",
-    ext: "main.py",
-    dockerImage: "compiler-x/python:3.12-alpine",
-    code: `# Compiler-X Sandbox: Python 3.12 Engine
-def quick_sort(arr):
-    if len(arr) <= 1:
-        return arr
-    pivot = arr[len(arr) // 2]
-    left = [x for x in arr if x < pivot]
-    middle = [x for x in arr if x == pivot]
-    right = [x for x in arr if x > pivot]
-    return quick_sort(left) + middle + quick_sort(right)
-
-sample = [64, 34, 25, 12, 22, 11, 90]
-print("Compiler-X [Python]: Sorting array in Docker container...")
-print("Initial:", sample)
-print("Sorted: ", quick_sort(sample))
-print("Memory limit: 128MB | Status: Complete")`,
-    output: `Compiler-X [Python]: Sorting array in Docker container...
-Initial: [64, 34, 25, 12, 22, 11, 90]
-Sorted:  [11, 12, 22, 25, 34, 64, 90]
-Memory limit: 128MB | Status: Complete`
-  },
-  java: {
-    name: "Java 21",
-    ext: "Solution.java",
-    dockerImage: "compiler-x/openjdk:21-slim",
-    code: `// Compiler-X Sandbox: OpenJDK 21 Engine
-import java.util.*;
-
-public class Solution {
-    public static void main(String[] args) {
-        System.out.println("⚡ Compiler-X Containerized Runner: Java 21");
-        int[] nums = {2, 7, 11, 15};
-        int target = 9;
-        
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int complement = target - nums[i];
-            if (map.containsKey(complement)) {
-                System.out.printf("Pair found at indices: [%d, %d]%n", map.get(complement), i);
-                break;
-            }
-            map.put(nums[i], i);
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
         }
-        System.out.println("Execution Status: [SUCCESS] Exit code 0");
-    }
-}`,
-    output: `⚡ Compiler-X Containerized Runner: Java 21
-Pair found at indices: [0, 1]
-Execution Status: [SUCCESS] Exit code 0`
-  },
-  c: {
-    name: "C (GCC 13)",
-    ext: "main.c",
-    dockerImage: "compiler-x/gcc:13-alpine",
-    code: `// Compiler-X Sandbox: GCC 13 Linux Sandbox
-#include <stdio.h>
-
-int main() {
-    printf("Compiler-X [C GCC]: Running in isolated Linux container\\n");
-    printf("Memory limit: 128MB | CPU quota: 0.5 core\\n");
-    printf("Sub-second sandboxed execution initialized.\\n");
-    printf("Process exited with code 0 (SIG_SUCCESS).\\n");
-    return 0;
-}`,
-    output: `Compiler-X [C GCC]: Running in isolated Linux container
-Memory limit: 128MB | CPU quota: 0.5 core
-Sub-second sandboxed execution initialized.
-Process exited with code 0 (SIG_SUCCESS).`
-  },
-  javascript: {
-    name: "Node.js v20",
-    ext: "index.js",
-    dockerImage: "compiler-x/node:20-slim",
-    code: `// Compiler-X Sandbox: Node.js v20 V8 Engine
-const runSandboxExecution = () => {
-  const timestamp = new Date().toISOString();
-  console.log(\`[\${timestamp}] Ephemeral container spawned successfully.\`);
-  
-  const stats = {
-    engine: "Compiler-X Multi-Language Runtime",
-    architecture: "Docker Container Isolated",
-    eventLoopLatency: "0.2ms",
-    status: "Healthy"
-  };
-  
-  console.log("Telemetry payload:", JSON.stringify(stats, null, 2));
-};
-
-runSandboxExecution();`,
-    output: `[2026-10-21T15:24:08.112Z] Ephemeral container spawned successfully.
-Telemetry payload: {
-  "engine": "Compiler-X Multi-Language Runtime",
-  "architecture": "Docker Container Isolated",
-  "eventLoopLatency": "0.2ms",
-  "status": "Healthy"
-}`
-  },
-  csharp: {
-    name: "C# (.NET 8)",
-    ext: "Program.cs",
-    dockerImage: "compiler-x/dotnet:8.0",
-    code: `// Compiler-X Sandbox: .NET 8.0 SDK
-using System;
-
-class Program {
-    static void Main() {
-        Console.WriteLine("Compiler-X [.NET]: Isolated runtime active");
-        Console.WriteLine("Resource constraints applied via Linux Cgroups v2.");
-        Console.WriteLine("Process finished with exit code 0.");
-    }
-}`,
-    output: `Compiler-X [.NET]: Isolated runtime active
-Resource constraints applied via Linux Cgroups v2.
-Process finished with exit code 0.`
-  },
-  scala: {
-    name: "Scala 3.3",
-    ext: "Main.scala",
-    dockerImage: "compiler-x/scala:3.3.1",
-    code: `// Compiler-X Sandbox: Scala 3.3 JVM
-object CompilerXApp extends App {
-  println("Compiler-X [Scala]: Functional execution verified")
-  val languages = List("Python", "Java", "C", "JS", "C#", "Scala", "Kotlin")
-  println(s"Supported in current cluster: \${languages.mkString(", ")}")
-}`,
-    output: `Compiler-X [Scala]: Functional execution verified
-Supported in current cluster: Python, Java, C, JS, C#, Scala, Kotlin`
-  },
-  kotlin: {
-    name: "Kotlin 1.9",
-    ext: "Main.kt",
-    dockerImage: "compiler-x/kotlin:1.9",
-    code: `// Compiler-X Sandbox: Kotlin 1.9.22
-fun main() {
-    println("Compiler-X [Kotlin]: Coroutines & Safety Ready")
-    println("Docker container isolated worker initialized.")
-    println("Status: 200 OK | Finished execution.")
-}`,
-    output: `Compiler-X [Kotlin]: Coroutines & Safety Ready
-Docker container isolated worker initialized.
-Status: 200 OK | Finished execution.`
-  }
-};
-
-let currentLangKey = 'python';
-
-function initCompilerPlayground() {
-  const langButtons = document.querySelectorAll('.lang-btn');
-  const codeContentElem = document.getElementById('playground-code');
-  const lineNumbersElem = document.getElementById('playground-line-numbers');
-  const terminalOutputElem = document.getElementById('terminal-stdout');
-  const terminalMetaElem = document.getElementById('terminal-meta');
-  const activeFileLabel = document.getElementById('playground-file-label');
-  const runBtn = document.getElementById('btn-run-code');
-  const resetBtn = document.getElementById('btn-reset-code');
-  const copyBtn = document.getElementById('btn-copy-code');
-
-  function renderCode(key) {
-    const item = compilerSnippets[key];
-    if (!item || !codeContentElem) return;
-
-    currentLangKey = key;
-    codeContentElem.textContent = item.code;
-    
-    // Update active filename
-    if (activeFileLabel) {
-      activeFileLabel.textContent = item.ext;
-    }
-
-    // Update line numbers
-    const lineCount = item.code.split('\n').length;
-    let lineHtml = '';
-    for (let i = 1; i <= lineCount; i++) {
-      lineHtml += `<div>${i}</div>`;
-    }
-    if (lineNumbersElem) {
-      lineNumbersElem.innerHTML = lineHtml;
-    }
-
-    // Reset terminal preview with a clean state
-    if (terminalOutputElem) {
-      terminalOutputElem.textContent = `$ docker exec compiler-x-${key} ...\nHit "Run Code" to spin up ephemeral container.`;
-    }
-    if (terminalMetaElem) {
-      terminalMetaElem.textContent = `Image: ${item.dockerImage} | Isolated Sandbox`;
-    }
-  }
-
-  // Language pill button clicks
-  langButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      langButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const lang = btn.getAttribute('data-lang');
-      renderCode(lang);
-    });
-  });
-
-  // Run Code Simulation
-  if (runBtn) {
-    runBtn.addEventListener('click', () => {
-      const item = compilerSnippets[currentLangKey];
-      if (!item) return;
-
-      const randomContainerId = Math.random().toString(36).substring(2, 10);
-      const executionLatency = Math.floor(Math.random() * 80) + 110; // 110ms - 190ms
-
-      runBtn.disabled = true;
-      runBtn.innerHTML = `
-        <svg class="spin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
-          <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
-        </svg>
-        Spinning Container...
-      `;
-
-      if (terminalOutputElem) {
-        terminalOutputElem.textContent = `[Docker Daemon] Initializing ephemeral container '${randomContainerId}'...\n[Cgroups] Setting sandbox memory_limit=128M cpu_period=100000 cpu_quota=50000...\n[Security] Dropping capabilities, read-only rootfs applied...\n[Runner] Executing ${item.ext}...`;
-      }
-
-      setTimeout(() => {
-        if (terminalOutputElem) {
-          terminalOutputElem.innerHTML = `
-<span style="color: #64748b;">[Container: ${randomContainerId} | Image: ${item.dockerImage}]</span>
-<span style="color: #22c55e;">${escapeHtml(item.output)}</span>
-<span style="color: #38bdf8;">[Container Cleaned] Exit code: 0 | Execution time: ${executionLatency}ms | Memory used: 18.4MB</span>
-          `.trim();
-        }
-
-        if (terminalMetaElem) {
-          terminalMetaElem.textContent = `Sandbox State: Executed in ${executionLatency}ms | Memory: 18.4MB / 128MB limit | Exit: 0`;
-        }
-
-        runBtn.disabled = false;
-        runBtn.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Run Code
-        `;
-
-        showToast(`Compiled & Executed ${item.name} in ${executionLatency}ms!`, 'success');
-      }, 750);
-    });
-  }
-
-  // Reset button
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      renderCode(currentLangKey);
-      showToast('Playground code reset to default', 'info');
-    });
-  }
-
-  // Copy code button
-  if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      const code = codeContentElem ? codeContentElem.textContent : '';
-      navigator.clipboard.writeText(code).then(() => {
-        showToast('Code copied to clipboard!', 'success');
       });
-    });
-  }
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -30px 0px' }
+  );
 
-  // Initial render
-  renderCode('python');
+  elements.forEach(el => observer.observe(el));
 }
 
 /* ==========================================================================
-   5. TECHNICAL SKILLS CATEGORY FILTER
+   4. SKILLS CATEGORY FILTER
    ========================================================================== */
 function initSkillsFilter() {
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const skillCards = document.querySelectorAll('.skill-category-card');
+  const filterButtons = document.querySelectorAll('[data-skill-filter]');
+  const skillCards = document.querySelectorAll('[data-skill-category]');
+  if (!filterButtons.length || !skillCards.length) return;
 
-  filterBtns.forEach(btn => {
+  filterButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      const filter = btn.getAttribute('data-skill-filter');
 
-      const filter = btn.getAttribute('data-filter');
+      filterButtons.forEach(button => {
+        const isActive = button === btn;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', String(isActive));
+      });
 
       skillCards.forEach(card => {
-        const category = card.getAttribute('data-category');
-        if (filter === 'all' || category === filter) {
-          card.style.display = 'block';
-          card.style.opacity = '0';
-          setTimeout(() => {
-            card.style.transition = 'opacity 0.3s ease';
-            card.style.opacity = '1';
-          }, 10);
-        } else {
-          card.style.display = 'none';
-        }
+        const category = card.getAttribute('data-skill-category');
+        const show = filter === 'all' || category === filter;
+        card.classList.toggle('is-hidden', !show);
       });
     });
   });
 }
 
 /* ==========================================================================
-   6. CONTACT FORM & TOAST NOTIFICATION SYSTEM
+   5. CONFIGURABLE PLACEHOLDER LINKS
    ========================================================================== */
-function initContactForm() {
-  const form = document.getElementById('contact-form');
-  const messageInput = document.getElementById('form-message');
-  const charCounter = document.getElementById('char-count');
-  const copyEmailBtn = document.getElementById('copy-email-btn');
+function initConfigurableLinks() {
+  document.querySelectorAll('[data-handle-key]').forEach(el => {
+    const key = el.getAttribute('data-handle-key');
+    const configuredUrl = PORTFOLIO_CONFIG.links[key];
+    if (configuredUrl) {
+      el.textContent = configuredUrl.replace(/^https?:\/\/(www\.)?/, '');
+    }
+  });
 
-  // Character counter
-  if (messageInput && charCounter) {
-    messageInput.addEventListener('input', () => {
-      const length = messageInput.value.length;
-      charCounter.textContent = `${length} / 500`;
-      if (length > 480) {
-        charCounter.style.color = '#ef4444';
-      } else {
-        charCounter.style.color = 'var(--text-muted)';
-      }
-    });
-  }
+  document.querySelectorAll('.placeholder-link').forEach(link => {
+    const key = link.getAttribute('data-link-key');
+    const label = link.getAttribute('data-placeholder-label') || 'Link';
+    const configuredUrl = PORTFOLIO_CONFIG.links[key];
 
-  // Copy direct email address button
-  if (copyEmailBtn) {
-    copyEmailBtn.addEventListener('click', () => {
-      const email = copyEmailBtn.getAttribute('data-email') || 'shankarlashkar@gmail.com';
-      navigator.clipboard.writeText(email).then(() => {
-        showToast(`Copied ${email} to clipboard!`, 'success');
-      }).catch(() => {
-        showToast(`Email: ${email}`, 'info');
+    if (configuredUrl) {
+      link.setAttribute('href', configuredUrl);
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+      return;
+    }
+
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      openInfoModal({
+        title: `${label} — Editable Placeholder`,
+        bodyHtml: `
+          <p>This link is intentionally set as a safe editable placeholder so no fake URLs are used.</p>
+          <p>To activate your live <strong>${escapeHtml(label)}</strong> link, add your URL inside <code>PORTFOLIO_CONFIG.links.${escapeHtml(key)}</code> in <code>js/main.js</code>.</p>
+          <div class="modal-code-hint">PORTFOLIO_CONFIG.links.${escapeHtml(key)} = 'https://...'</div>
+        `
       });
     });
+  });
+}
+
+/* ==========================================================================
+   6. DOWNLOADABLE RESUME HANDLER
+   ========================================================================== */
+function initResumeDownload() {
+  const resumeBtn = document.getElementById('download-resume-btn');
+  if (!resumeBtn) return;
+
+  resumeBtn.addEventListener('click', () => {
+    const resumeUrl = PORTFOLIO_CONFIG.resumeUrl.trim();
+
+    if (resumeUrl) {
+      const tempLink = document.createElement('a');
+      tempLink.href = resumeUrl;
+      tempLink.setAttribute('download', 'Shankar-Lashkare-Resume.pdf');
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      tempLink.remove();
+      showToast('Downloading resume...');
+      return;
+    }
+
+    openInfoModal({
+      title: 'Resume Download Placeholder',
+      bodyHtml: `
+        <p>Your resume download button is ready. Add your PDF file inside the <code>assets/</code> folder and set <code>PORTFOLIO_CONFIG.resumeUrl</code> in <code>js/main.js</code> to enable direct one-click downloads.</p>
+        <div class="modal-code-hint">PORTFOLIO_CONFIG.resumeUrl = 'assets/Shankar-Lashkare-Resume.pdf';</div>
+      `
+    });
+  });
+}
+
+/* ==========================================================================
+   7. CONTACT SECTION (WORKING MAILTO & CLIPBOARD COPY)
+   ========================================================================== */
+function initContactSection() {
+  const email = PORTFOLIO_CONFIG.email;
+  const emailLink = document.getElementById('contact-email-link');
+  const directContactBtn = document.getElementById('direct-contact-btn');
+  const copyEmailBtn = document.getElementById('copy-email-btn');
+  const contactForm = document.getElementById('contact-form');
+
+  if (emailLink) {
+    emailLink.textContent = email;
+    emailLink.setAttribute('href', `mailto:${email}`);
   }
 
-  // Form Submission
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+  if (directContactBtn) {
+    directContactBtn.setAttribute('href', `mailto:${email}?subject=${encodeURIComponent('Hello Shankar')}`);
+  }
 
-      const name = document.getElementById('form-name')?.value.trim();
-      const email = document.getElementById('form-email')?.value.trim();
-      const subject = document.getElementById('form-subject')?.value.trim();
-      const message = messageInput?.value.trim();
+  if (copyEmailBtn) {
+    copyEmailBtn.addEventListener('click', () => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(
+          () => showToast(`Copied ${email} to clipboard.`),
+          () => showToast(`Email: ${email}`)
+        );
+      } else {
+        showToast(`Email: ${email}`);
+      }
+    });
+  }
 
-      if (!name || !email || !message) {
-        showToast('Please fill out all required fields.', 'error');
+  if (contactForm) {
+    contactForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const nameInput = document.getElementById('sender-name');
+      const subjectInput = document.getElementById('sender-subject');
+      const messageInput = document.getElementById('sender-message');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const subject = subjectInput ? subjectInput.value.trim() : '';
+      const message = messageInput ? messageInput.value.trim() : '';
+
+      if (!name || !subject || !message) {
+        showToast('Please fill in your name, subject, and message.');
         return;
       }
 
-      // Email format check
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        showToast('Please provide a valid email address.', 'error');
-        return;
-      }
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `
-        <svg class="spin-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
-          <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
-        </svg>
-        Sending Message...
-      `;
-
-      setTimeout(() => {
-        form.reset();
-        if (charCounter) charCounter.textContent = '0 / 500';
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-        showToast('Message sent successfully! Shankar will reply shortly.', 'success');
-      }, 1000);
+      const fullBody = `Hi Shankar,\n\n${message}\n\nBest regards,\n${name}`;
+      const mailtoHref = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+      window.location.href = mailtoHref;
+      showToast('Opening your email client...');
     });
   }
 }
 
-// Global Toast System
-function showToast(message, type = 'info') {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
+/* ==========================================================================
+   8. MODAL & TOAST HELPERS
+   ========================================================================== */
+let lastFocusedElement = null;
+
+function openInfoModal({ title, bodyHtml }) {
+  const backdrop = document.getElementById('info-modal');
+  const titleEl = document.getElementById('info-modal-title');
+  const bodyEl = document.getElementById('info-modal-body');
+  const closeBtn = document.getElementById('info-modal-close');
+
+  if (!backdrop || !titleEl || !bodyEl) return;
+
+  lastFocusedElement = document.activeElement;
+  titleEl.textContent = title;
+  bodyEl.innerHTML = bodyHtml;
+  backdrop.classList.add('open');
+  backdrop.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  if (closeBtn) closeBtn.focus();
+}
+
+function closeInfoModal() {
+  const backdrop = document.getElementById('info-modal');
+  if (!backdrop || !backdrop.classList.contains('open')) return;
+
+  backdrop.classList.remove('open');
+  backdrop.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+
+  if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+    lastFocusedElement.focus();
   }
+}
+
+function initModalControls() {
+  const backdrop = document.getElementById('info-modal');
+  const closeBtn = document.getElementById('info-modal-close');
+  const okBtn = document.getElementById('info-modal-ok');
+
+  if (!backdrop) return;
+
+  if (closeBtn) closeBtn.addEventListener('click', closeInfoModal);
+  if (okBtn) okBtn.addEventListener('click', closeInfoModal);
+
+  backdrop.addEventListener('click', (event) => {
+    if (event.target === backdrop) closeInfoModal();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && backdrop.classList.contains('open')) {
+      closeInfoModal();
+    }
+  });
+}
+
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-
-  let iconSvg = '';
-  if (type === 'success') {
-    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-  } else if (type === 'error') {
-    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
-  } else {
-    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-  }
-
-  toast.innerHTML = `
-    ${iconSvg}
-    <span>${escapeHtml(message)}</span>
-  `;
-
+  toast.className = 'toast';
+  toast.textContent = message;
   container.appendChild(toast);
 
   setTimeout(() => {
-    toast.style.animation = 'toast-fade-out 0.3s ease forwards';
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
-  }, 3500);
+    toast.remove();
+  }, 3000);
 }
 
-/* ==========================================================================
-   7. INTERACTIVE RESUME MODAL
-   ========================================================================== */
-function initResumeModal() {
-  const openBtns = document.querySelectorAll('.open-resume-modal');
-  const modalBackdrop = document.getElementById('resume-modal');
-  const closeBtn = document.getElementById('close-resume-modal');
-  const downloadBtn = document.getElementById('download-resume-btn');
-
-  if (!modalBackdrop) return;
-
-  function openModal() {
-    modalBackdrop.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    modalBackdrop.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  openBtns.forEach(btn => btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    openModal();
-  }));
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-  modalBackdrop.addEventListener('click', (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
-      showToast('Generating official resume PDF for Shankar Lashkar...', 'info');
-      setTimeout(() => {
-        showToast('Resume downloaded successfully!', 'success');
-        // Trigger simulated print or download
-        window.print();
-      }, 800);
-    });
+function updateFooterYear() {
+  const yearEl = document.getElementById('footer-year');
+  if (yearEl) {
+    yearEl.textContent = String(new Date().getFullYear());
   }
 }
 
-/* ==========================================================================
-   8. 3D TILT EFFECT ON PHOTO CARD
-   ========================================================================== */
-function initTiltEffect() {
-  const card = document.getElementById('profile-photo-card');
-  if (!card) return;
-
-  // Only apply tilt on larger screens
-  if (window.innerWidth < 992) return;
-
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    const deltaX = (x - centerX) / centerX;
-    const deltaY = (y - centerY) / centerY;
-    
-    const rotateX = -deltaY * 8; // degrees
-    const rotateY = deltaX * 8;
-
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-  });
-
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-  });
-}
-
-/* ==========================================================================
-   9. BACK TO TOP
-   ========================================================================== */
-function initBackToTop() {
-  const btn = document.getElementById('back-to-top-btn');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-}
-
-/* Helper: Escape HTML string */
-function escapeHtml(str) {
-  return String(str)
+function escapeHtml(value) {
+  return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/'/g, '&#39;');
 }
