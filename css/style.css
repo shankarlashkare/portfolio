@@ -158,7 +158,10 @@ button {
   color: inherit;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-heading);
   color: var(--text-primary);
   line-height: 1.2;
@@ -533,6 +536,7 @@ p {
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -973,10 +977,21 @@ p {
   background-color: var(--bg-subtle);
 }
 
-.mockup-line.w-60 { width: 60%; }
-.mockup-line.w-80 { width: 80%; }
-.mockup-line.w-45 { width: 45%; }
-.mockup-line.accent { background-color: var(--border-medium); }
+.mockup-line.w-60 {
+  width: 60%;
+}
+
+.mockup-line.w-80 {
+  width: 80%;
+}
+
+.mockup-line.w-45 {
+  width: 45%;
+}
+
+.mockup-line.accent {
+  background-color: var(--border-medium);
+}
 
 .mockup-caption {
   margin-top: 0.35rem;
