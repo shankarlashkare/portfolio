@@ -8,14 +8,14 @@
  * Replace any empty/placeholder values below with your real links and resume file path.
  */
 const PORTFOLIO_CONFIG = {
-  email: 'your.email@example.com',
+  email: 'shankarlashkare357@gmail.com',
   resumeUrl: '', // e.g. 'assets/Shankar-Lashkare-Resume.pdf' once your PDF is placed in assets/
   links: {
-    github: '',         // e.g. 'https://github.com/your-username'
+    github: 'https://github.com/shankarlashkare',
     leetcode: '',       // e.g. 'https://leetcode.com/u/your-username'
     linkedin: '',       // e.g. 'https://www.linkedin.com/in/your-profile'
     compilerXRepo: '',  // e.g. 'https://github.com/your-username/compiler-x'
-    portfolioRepo: '',  // e.g. 'https://github.com/your-username/portfolio'
+    portfolioRepo: 'https://github.com/shankarlashkare/portfolio',
     javaDsaRepo: ''     // e.g. 'https://github.com/your-username/java-dsa'
   }
 };
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactSection();
   initModalControls();
   updateFooterYear();
+  initHeroTypewriter();
 });
 
 /* ==========================================================================
@@ -298,10 +299,92 @@ function initResumeDownload() {
     }
 
     openInfoModal({
-      title: 'Resume Download Placeholder',
+      title: 'Shankar Lashkare — Resume',
       bodyHtml: `
-        <p>Your resume download button is ready. Add your PDF file inside the <code>assets/</code> folder and set <code>PORTFOLIO_CONFIG.resumeUrl</code> in <code>js/main.js</code> to enable direct one-click downloads.</p>
-        <div class="modal-code-hint">PORTFOLIO_CONFIG.resumeUrl = 'assets/Shankar-Lashkare-Resume.pdf';</div>
+        <div class="resume-modal-content">
+          <div class="resume-header">
+            <h2>SHANKAR LASHKARE</h2>
+            <p class="resume-sub">Aspiring Full-Stack Developer</p>
+            <div class="resume-contacts">
+              <span>📞 8432028668</span>
+              <span>✉️ <a href="mailto:shankarlashkare357@gmail.com">shankarlashkare357@gmail.com</a></span>
+              <span>🔗 <a href="https://github.com/shankarlashkare" target="_blank" rel="noopener">github.com/shankarlashkare</a></span>
+              <span>📍 Maharashtra, India</span>
+            </div>
+          </div>
+
+          <div class="resume-section">
+            <h3>PROFESSIONAL SUMMARY</h3>
+            <p>Motivated Computer Engineering Diploma student with a strong interest in Full-Stack Web Development and Software Engineering. Familiar with Java, OOP, HTML, CSS, and JavaScript. Eager to build practical applications and contribute as a Full-Stack Developer.</p>
+          </div>
+
+          <div class="resume-section">
+            <h3>EDUCATION</h3>
+            <p><strong>Diploma in Computer Engineering</strong><br>Balaghat Polytechnic College | MSBTE | Third Year (Currently Pursuing)</p>
+            <table class="resume-table">
+              <tr><th>Semester</th><th>Percentage</th></tr>
+              <tr><td>Semester 1</td><td>77.60%</td></tr>
+              <tr><td>Semester 2</td><td>77.80%</td></tr>
+              <tr><td>Semester 3</td><td>70.30%</td></tr>
+              <tr><td>Semester 4</td><td>73.27%</td></tr>
+            </table>
+          </div>
+
+          <div class="resume-section">
+            <h3>TECHNICAL SKILLS</h3>
+            <ul>
+              <li><strong>Programming:</strong> Java, JavaScript</li>
+              <li><strong>Web Development:</strong> HTML5, CSS3</li>
+              <li><strong>Core Concepts:</strong> Object-Oriented Programming (OOP)</li>
+              <li><strong>Tools:</strong> Git, GitHub</li>
+              <li><strong>Currently Learning:</strong> Data Structures & Algorithms (Java), Full-Stack Development</li>
+            </ul>
+          </div>
+
+          <div class="resume-section">
+            <h3>INTERNSHIP EXPERIENCE</h3>
+            <p><strong>Web Development Intern – Skillsway</strong></p>
+            <ul>
+              <li>Gained exposure to web development concepts</li>
+              <li>Practiced building and designing web pages</li>
+              <li>Worked with HTML, CSS, and JavaScript</li>
+              <li>Improved understanding of website structure and development</li>
+            </ul>
+          </div>
+
+          <div class="resume-section">
+            <h3>PROJECTS</h3>
+            <p><strong>1. Personal Portfolio Website</strong></p>
+            <ul>
+              <li>Developed a personal portfolio to showcase technical skills and projects</li>
+              <li>Used HTML and CSS for website structure and styling</li>
+              <li>🔗 <a href="https://github.com/shankarlashkare/portfolio" target="_blank" rel="noopener">github.com/shankarlashkare/portfolio</a></li>
+            </ul>
+            <p><strong>2. Compiler X – Intelligent Login</strong></p>
+            <ul>
+              <li>Worked on an application interface with an intelligent login concept</li>
+              <li>Used HTML, CSS, and Firebase authentication-related technologies</li>
+              <li>Focused on login interface design and functionality</li>
+            </ul>
+          </div>
+
+          <div class="resume-section">
+            <h3>AREAS OF INTEREST</h3>
+            <ul>
+              <li>Full-Stack Web Development</li>
+              <li>Java Programming</li>
+              <li>Data Structures and Algorithms</li>
+              <li>Software Engineering & Problem Solving</li>
+            </ul>
+          </div>
+
+          <div class="resume-section">
+            <h3>CAREER OBJECTIVE</h3>
+            <p>To begin my professional journey as a Full-Stack Developer, strengthen my software development skills, and contribute to real-world projects while continuously learning new technologies.</p>
+          </div>
+
+          <p class="resume-pdf-note">💡 To enable PDF download, place your resume PDF in <code>assets/</code> and set <code>PORTFOLIO_CONFIG.resumeUrl</code> in <code>js/main.js</code>.</p>
+        </div>
       `
     });
   });
@@ -449,4 +532,44 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/* ==========================================================================
+   10. HERO TYPEWRITER ANIMATION
+   ========================================================================== */
+function initHeroTypewriter() {
+  const nameEl = document.querySelector('.hero-name');
+  if (!nameEl) return;
+
+  const fullText = nameEl.textContent.trim();
+  nameEl.textContent = '';
+
+  // Add blinking cursor
+  const cursor = document.createElement('span');
+  cursor.className = 'hero-name-cursor';
+  cursor.setAttribute('aria-hidden', 'true');
+  nameEl.appendChild(cursor);
+
+  let i = 0;
+  const speed = 65; // ms per character
+
+  function typeNext() {
+    if (i < fullText.length) {
+      // Insert character before cursor
+      const charNode = document.createTextNode(fullText[i]);
+      nameEl.insertBefore(charNode, cursor);
+      i++;
+      setTimeout(typeNext, speed);
+    } else {
+      // Typing done — remove cursor after 2.5s
+      setTimeout(() => {
+        cursor.style.animation = 'none';
+        cursor.style.opacity = '0';
+        setTimeout(() => cursor.remove(), 400);
+      }, 2500);
+    }
+  }
+
+  // Start after a short delay so greeting animates first
+  setTimeout(typeNext, 600);
 }

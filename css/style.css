@@ -581,7 +581,7 @@ p {
   flex-shrink: 0;
 }
 
-/* ---- Hero Greeting Animation ---- */
+/* ---- Hero Greeting & Typewriter Animation ---- */
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -598,9 +598,10 @@ p {
   50%       { text-shadow: 0 0 16px rgba(99, 102, 241, 0.6), 0 0 40px rgba(139, 92, 246, 0.3); }
 }
 
-@keyframes typeWriter {
-  from { opacity: 0; letter-spacing: 0.3em; }
-  to   { opacity: 1; letter-spacing: 0.08em; }
+/* Cursor blink for typewriter */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 .hero-greeting {
@@ -617,6 +618,7 @@ p {
   animation: fadeSlideUp 0.7s var(--ease-out) both;
 }
 
+/* hero-name wrapper — typewriter JS fills chars one by one */
 .hero-name {
   font-family: 'Orbitron', 'Plus Jakarta Sans', sans-serif;
   font-size: clamp(1.9rem, 5.8vw, 3.4rem);
@@ -629,10 +631,22 @@ p {
   background-size: 300% 300%;
   -webkit-background-clip: text;
   background-clip: text;
+  min-height: 1.2em;
   animation:
-    fadeSlideUp 0.9s 0.15s var(--ease-out) both,
-    gradientShift 5s 1s ease infinite,
-    glowPulse 3s 1s ease-in-out infinite;
+    gradientShift 5s 2.5s ease infinite,
+    glowPulse 3s 2.5s ease-in-out infinite;
+}
+
+/* Blinking cursor appended by JS */
+.hero-name-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.85em;
+  background: #8b5cf6;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-radius: 2px;
+  animation: cursorBlink 0.75s step-end infinite;
 }
 
 [data-theme="dark"] .hero-name {
@@ -1590,6 +1604,110 @@ p {
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   word-break: break-word;
+}
+
+/* Resume Modal Styles */
+.resume-modal-content {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.resume-header {
+  text-align: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--border-subtle);
+}
+
+.resume-header h2 {
+  font-family: 'Orbitron', 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: transparent;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  margin-bottom: 0.2rem;
+}
+
+.resume-sub {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.resume-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  font-size: 0.82rem;
+}
+
+.resume-contacts a {
+  color: #6366f1;
+  text-decoration: none;
+}
+
+.resume-section {
+  margin-bottom: 1rem;
+}
+
+.resume-section h3 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.6rem;
+}
+
+.resume-section ul {
+  padding-left: 1.2rem;
+  margin: 0.4rem 0;
+}
+
+.resume-section ul li {
+  margin-bottom: 0.25rem;
+}
+
+.resume-section a {
+  color: #6366f1;
+  text-decoration: none;
+}
+
+.resume-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-top: 0.5rem;
+}
+
+.resume-table th,
+.resume-table td {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.resume-table th {
+  background-color: var(--bg-subtle);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.resume-pdf-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .modal-footer {
