@@ -13,12 +13,12 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg-page: #ffffff;
-  --bg-surface: #fafafa;
-  --bg-card: #ffffff;
-  --bg-subtle: #f4f4f5;
-  --bg-subtle-hover: #ebebee;
-  --bg-nav: rgba(255, 255, 255, 0.88);
+  --bg-page: #f0f0f5;
+  --bg-surface: #e8e8f0;
+  --bg-card: #f5f5fa;
+  --bg-subtle: #e2e2ec;
+  --bg-subtle-hover: #d8d8e8;
+  --bg-nav: rgba(240, 240, 245, 0.92);
   --bg-backdrop: rgba(10, 10, 10, 0.45);
 
   --text-primary: #0a0a0a;
@@ -621,11 +621,13 @@ p {
 /* hero-name wrapper — typewriter JS fills chars one by one */
 .hero-name {
   font-family: 'Orbitron', 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(1.9rem, 5.8vw, 3.4rem);
+  font-size: clamp(1.3rem, 3.8vw, 2.2rem);
   font-weight: 900;
   letter-spacing: 0.08em;
   line-height: 1.1;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
   color: transparent;
   background: linear-gradient(135deg, #111827 0%, #6366f1 40%, #8b5cf6 70%, #111827 100%);
   background-size: 300% 300%;

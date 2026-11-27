@@ -535,7 +535,7 @@ function escapeHtml(value) {
 }
 
 /* ==========================================================================
-   10. HERO TYPEWRITER ANIMATION
+   10. HERO TYPEWRITER ANIMATION (slow, looping, single-line)
    ========================================================================== */
 function initHeroTypewriter() {
   const nameEl = document.querySelector('.hero-name');
@@ -544,32 +544,43 @@ function initHeroTypewriter() {
   const fullText = nameEl.textContent.trim();
   nameEl.textContent = '';
 
-  // Add blinking cursor
+  // Add blinking cursor (stays forever during loop)
   const cursor = document.createElement('span');
   cursor.className = 'hero-name-cursor';
   cursor.setAttribute('aria-hidden', 'true');
   nameEl.appendChild(cursor);
 
-  let i = 0;
-  const speed = 65; // ms per character
+  const TYPE_SPEED  = 120;  // ms per char while typing  (slower)
+  const ERASE_SPEED =  60;  // ms per char while erasing (faster)
+  const PAUSE_AFTER = 2000; // ms pause when fully typed
+  const PAUSE_EMPTY =  500; // ms pause before restarting
 
-  function typeNext() {
-    if (i < fullText.length) {
-      // Insert character before cursor
-      const charNode = document.createTextNode(fullText[i]);
-      nameEl.insertBefore(charNode, cursor);
-      i++;
-      setTimeout(typeNext, speed);
+  let charNodes = []; // track text nodes so we can erase cleanly
+
+  function typeChar() {
+    const idx = charNodes.length;
+    if (idx < fullText.length) {
+      const node = document.createTextNode(fullText[idx]);
+      nameEl.insertBefore(node, cursor);
+      charNodes.push(node);
+      setTimeout(typeChar, TYPE_SPEED);
     } else {
-      // Typing done — remove cursor after 2.5s
-      setTimeout(() => {
-        cursor.style.animation = 'none';
-        cursor.style.opacity = '0';
-        setTimeout(() => cursor.remove(), 400);
-      }, 2500);
+      // Fully typed — pause then erase
+      setTimeout(eraseChar, PAUSE_AFTER);
     }
   }
 
-  // Start after a short delay so greeting animates first
-  setTimeout(typeNext, 600);
+  function eraseChar() {
+    if (charNodes.length > 0) {
+      const last = charNodes.pop();
+      last.remove();
+      setTimeout(eraseChar, ERASE_SPEED);
+    } else {
+      // Fully erased — pause then retype
+      setTimeout(typeChar, PAUSE_EMPTY);
+    }
+  }
+
+  // Start after short delay so greeting fades in first
+  setTimeout(typeChar, 700);
 }
