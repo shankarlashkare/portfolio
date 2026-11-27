@@ -67,6 +67,10 @@
   --nav-height: 4.25rem;
 }
 
+body {
+  user-select: none;
+}
+
 [data-theme="dark"] {
   color-scheme: dark;
 
@@ -583,25 +587,54 @@ p {
 
 /* ---- Hero Greeting & Typewriter Animation ---- */
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes glowPulse {
-  0%, 100% { text-shadow: 0 0 8px rgba(99, 102, 241, 0.3), 0 0 20px rgba(139, 92, 246, 0.15); }
-  50%       { text-shadow: 0 0 16px rgba(99, 102, 241, 0.6), 0 0 40px rgba(139, 92, 246, 0.3); }
+
+  0%,
+  100% {
+    text-shadow: 0 0 8px rgba(99, 102, 241, 0.3), 0 0 20px rgba(139, 92, 246, 0.15);
+  }
+
+  50% {
+    text-shadow: 0 0 16px rgba(99, 102, 241, 0.6), 0 0 40px rgba(139, 92, 246, 0.3);
+  }
 }
 
 /* Cursor blink for typewriter */
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 .hero-greeting {
